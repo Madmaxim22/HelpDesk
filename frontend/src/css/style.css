@@ -207,13 +207,21 @@ header h1 {
   color: #2c3e50;
 }
 
-.form-group input[type="text"],
+.form-group input,
 .form-group textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Дополнительные стили для input, чтобы гарантировать их применение */
+.form-group input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .form-group textarea {
