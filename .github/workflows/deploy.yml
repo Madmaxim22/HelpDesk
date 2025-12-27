@@ -1,0 +1,95 @@
+name: Test and Deploy
+
+# Триггеры запуска workflow
+on:
+  # При пуше в ветку main
+  push:
+    branches: ["main"]
+  # При создании pull request в ветку main
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  # Задача линтера для frontend
+  eslint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    permissions:
+      contents: read
+
+    steps:
+      # Шаг 1: Получение кода из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Шаг 2: Настройка Node.js среды
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17.0" # Конкретная версия Node.js для стабильности
+          cache: "npm" # Кэширование npm зависимостей для ускорения
+
+      # Шаг 3: Установка зависимостей
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Шаг 4: Запуск eslint
+      - name: Run eslint
+        run: npm run lint
+
+  # Задача сборки frontend и деплоя на GitHub Pages (запускается только после успешного тестирования)
+  deploy-frontend:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    needs: [eslint] # Зависимость: выполняется только если задачи успешны
+    # Условие: запускать только при пуше в main ветку (не при PR)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      # Шаг 1: Получение кода (повторно для чистого состояния)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Шаг 2: Настройка Node.js (аналогично задаче test)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17.0"
+          cache: "npm"
+
+      # Шаг 3: Установка зависимостей
+      - name: Install dependencies
+        run: npm ci
+
+      # Шаг 4: Сборка проекта для production
+      - name: Build project
+        run: npm run build:prod
+
+      # Шаг 5: Настройка GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # Шаг 6: Загрузка артефакта для GitHub Pages
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./frontend/build
+
+      # Шаг 7: Деплой на GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
