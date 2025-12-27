@@ -1,5 +1,9 @@
 # HelpDesk - Приложение для управления заявками
 
+
+![Test and Deploy](https://github.com/Madmaxim22/HelpDesk/workflows/Test%20and%20Deploy/badge.svg)
+[![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-blue?logo=github)](https://madmaxim22.github.io/HelpDesk/)
+
 ## Описание проекта
 
 HelpDesk - это веб-приложение для управления заявками, состоящее из backend и frontend частей. Backend предоставляет REST API для работы с тикетами, а frontend предоставляет пользовательский интерфейс для взаимодействия с системой.
